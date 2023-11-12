@@ -8,7 +8,20 @@ spring:
     gateway:
       # 路由规则
       routes:
-        - id: product-service           # 路由 ID，唯一
-          uri: http://localhost:7070/   # 目标 URI，路由到微服务的地址
+        - id: service-provider           # 路由 ID，唯一
+          uri: lb://service-provider     # lb:// 根据服务名称从注册中心获取服务请求地址
           predicates: # 断言（判断条件）
             - Path=/product/**          # 匹配对应 URL 的请求，将匹配到的请求追加在目标 URI 之后
+      discovery:
+        locator:
+          # 是否与服务发现组件进行结合，通过 serviceId 转发到具体服务实例。
+          enabled: true                  # 是否开启基于服务发现的路由规则
+          lower-case-service-id: true    # 是否将服务名称转小写
+#配置 Eureka Server 注册中心
+eureka:
+  instance:
+    prefer-ip-address: true       # 是否使用 ip 地址注册
+    instance-id: ${spring.cloud.client.ip-address}:${server.port} # ip:port
+  client:
+    service-url:                  # 设置服务注册中心地址
+      defaultZone: http://root:123456@localhost:8761/eureka/,http://root:123456@localhost:8762/eureka/
